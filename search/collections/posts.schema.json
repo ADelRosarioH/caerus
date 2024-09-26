@@ -1,0 +1,11 @@
+{
+  "name": "posts",
+  "fields": [
+    { "name": "id", "type": "string" },
+    { "name": "title", "type": "string" },
+    { "name": "content", "type": "string" },
+    { "name": "user_id", "type": "int32" },
+    { "name": "created_at", "type": "int64" }
+  ],
+  "default_sorting_field": "created_at"
+}

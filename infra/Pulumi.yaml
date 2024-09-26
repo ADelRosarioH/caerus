@@ -1,0 +1,5 @@
+name: caerus
+runtime: nodejs
+description: AWS infrastructure for your project
+backend:
+  url: file://./pulumi-state

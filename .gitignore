@@ -1,0 +1,7 @@
+# Existing .gitignore content...
+
+# Environment files
+/config/*.env
+!/config/example.env
+
+# Other entries...

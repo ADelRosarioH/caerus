@@ -1,0 +1,135 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=myuser
+      - DB_PASSWORD=mypassword
+      - DB_NAME=mydb
+      - DB_PORT=5432
+      - KRATOS_PUBLIC_URL=http://kratos:4433/
+      - KETO_WRITE_URL=http://keto:4466/
+      - KETO_READ_URL=http://keto:4467/
+    depends_on:
+      - postgres
+      - kratos
+      - keto
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/db-init.sh:/docker-entrypoint-initdb.d/db-init.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ksun:
+    image: oryd/kratos-selfservice-ui-node:v1.2.0
+    environment:
+      - PORT=4435
+      - KRATOS_PUBLIC_URL=http://kratos:4433/
+      - KRATOS_BROWSER_URL=http://localhost:4433/
+      - COOKIE_SECRET=changeme
+      - CSRF_COOKIE_NAME=ory_csrf_ui
+      - CSRF_COOKIE_SECRET=changeme
+    ports:
+      - "4435:4435"
+    restart: on-failure
+    depends_on:
+      kratos:
+        condition: service_started
+    networks:
+      - intranet
+
+  kratos:
+    build:
+      context: ./ory/kratos
+      dockerfile: Dockerfile
+    ports:
+      - "4433:4433" # public
+      - "4434:4434" # admin
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=trace
+      - DSN=postgres://myuser:mypassword@postgres:5432/ory?sslmode=disable&max_conns=20&max_idle_conns=4
+      - COURIER_SMTP_CONNECTION_URI=smtps://mailslurper:1025/?skip_ssl_verify=true
+      - SERVE_PUBLIC_BASE_URL=http://localhost:4433/
+    depends_on:
+      mailslurper:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    networks:
+      - intranet
+
+  keto:
+    build:
+      context: ./ory/keto
+      dockerfile: Dockerfile
+    ports:
+      - "4466:4466"
+      - "4467:4467"
+    environment:
+      - DSN=postgres://myuser:mypassword@postgres:5432/ory?sslmode=disable
+    depends_on:
+      kratos:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    networks:
+      - intranet
+
+  mailslurper:
+    image: oryd/mailslurper:latest-smtps
+    ports:
+      - "4436:4436"
+      - "4437:4437"
+    environment:
+      - MAILSLURPER_WWW_HOST=0.0.0.0
+      - MAILSLURPER_WWW_PORT=4436
+      - MAILSLURPER_SMTP_HOST=0.0.0.0
+      - MAILSLURPER_SMTP_PORT=1025
+      - MAILSLURPER_ADMIN_HOST=0.0.0.0
+      - MAILSLURPER_ADMIN_PORT=4437
+    networks:
+      - intranet
+
+  typesense:
+    image: typesense/typesense:0.23.1
+    ports:
+      - "8108:8108"
+    volumes:
+      - typesense_data:/data
+
+volumes:
+  postgres_data:
+  typesense_data:
+
+networks:
+  intranet:
