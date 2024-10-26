@@ -1,65 +1,61 @@
 package auth
 
 import (
-	"context"
-	"os"
-
-	keto "github.com/ory/keto-client-go"
-	kratos "github.com/ory/kratos-client-go"
+	"github.com/gofiber/fiber/v2/log"
+	"github.com/supertokens/supertokens-golang/recipe/dashboard"
+	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
+	"github.com/supertokens/supertokens-golang/recipe/session"
+	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
-type AuthService struct {
-	kratosClient    *kratos.APIClient
-	ketoReadClient  *keto.APIClient
-	ketoWriteClient *keto.APIClient
-}
-
-func NewAuthService() (*AuthService, error) {
-	kratosConfig := kratos.NewConfiguration()
-	kratosConfig.Servers = []kratos.ServerConfiguration{
-		{
-			URL: os.Getenv("KRATOS_PUBLIC_URL"),
+func Init() error {
+	// Initialize SuperTokens
+	apiBasePath := "/api/auth"
+	websiteBasePath := "/auth"
+	err := supertokens.Init(supertokens.TypeInput{
+		Supertokens: &supertokens.ConnectionInfo{
+			ConnectionURI: "http://localhost:3567",
 		},
-	}
-
-	ketoReadConfig := keto.NewConfiguration()
-	ketoReadConfig.Servers = []keto.ServerConfiguration{
-		{
-			URL: os.Getenv("KETO_READ_URL"),
+		AppInfo: supertokens.AppInfo{
+			AppName:         "Caerus",
+			APIDomain:       "http://localhost",
+			WebsiteDomain:   "http://localhost",
+			APIBasePath:     &apiBasePath,
+			WebsiteBasePath: &websiteBasePath,
 		},
-	}
-
-	ketoWriteConfig := keto.NewConfiguration()
-	ketoWriteConfig.Servers = []keto.ServerConfiguration{
-		{
-			URL: os.Getenv("KETO_WRITE_URL"),
+		RecipeList: []supertokens.Recipe{
+			emailpassword.Init(nil),
+			session.Init(nil),
+			dashboard.Init(nil),
 		},
-	}
+	})
 
-	return &AuthService{
-		kratosClient:    kratos.NewAPIClient(kratosConfig),
-		ketoReadClient:  keto.NewAPIClient(ketoReadConfig),
-		ketoWriteClient: keto.NewAPIClient(ketoWriteConfig),
-	}, nil
-}
-
-func (s *AuthService) ValidateSession(sessionToken string) (*kratos.Session, error) {
-	session, _, err := s.kratosClient.FrontendAPI.ToSession(context.Background()).Cookie(sessionToken).Execute()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return session, nil
+
+	log.Info("SuperTokens initialized")
+
+	return nil
 }
 
-func (s *AuthService) CheckPermission(namespace, object, relation, subject string) (bool, error) {
-	resp, _, err := s.ketoReadClient.PermissionApi.CheckPermission(context.Background()).
-		Namespace(namespace).
-		Object(object).
-		Relation(relation).
-		SubjectId(subject).
-		Execute()
-	if err != nil {
-		return false, err
-	}
-	return resp.Allowed, nil
-}
+// func ValidateSession(sessionToken string) (*kratos.Session, error) {
+// 	session, _, err := s.kratosClient.FrontendAPI.ToSession(context.Background()).Cookie(sessionToken).Execute()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return session, nil
+// }
+
+// func (s *AuthService) CheckPermission(namespace, object, relation, subject string) (bool, error) {
+// 	resp, _, err := s.ketoReadClient.PermissionApi.CheckPermission(context.Background()).
+// 		Namespace(namespace).
+// 		Object(object).
+// 		Relation(relation).
+// 		SubjectId(subject).
+// 		Execute()
+// 	if err != nil {
+// 		return false, err
+// 	}
+// 	return resp.Allowed, nil
+// }

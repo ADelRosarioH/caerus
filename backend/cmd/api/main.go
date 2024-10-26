@@ -19,7 +19,8 @@ func main() {
 	app := fiber.New()
 
 	// Initialize auth service
-	authService, err := auth.NewAuthService()
+	err := auth.Init()
+
 	if err != nil {
 		log.Fatalf("Failed to initialize auth service: %v", err)
 	}
@@ -28,7 +29,8 @@ func main() {
 	app.Use(healthcheck.New())
 
 	// Initialize auth middleware
-	authMiddleware := middleware.NewAuthMiddleware(authService)
+	app.Use(middleware.Cors())
+	app.Use(middleware.Auth())
 
 	// Initialize database
 	if err := database.InitDatabase(); err != nil {
@@ -42,8 +44,8 @@ func main() {
 	// }
 
 	// Setup routes
-	api := app.Group("/api")
-	api.Use(authMiddleware.Authenticate())
+	// api := app.Group("/api")
+	// api.Use(authMiddleware.Authenticate())
 
 	port := os.Getenv("PORT")
 	if port == "" {

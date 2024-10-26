@@ -1,7 +1,6 @@
-# Use the official Node.js LTS image as a parent image
-FROM node:lts-alpine
+# Build stage
+FROM node:lts-alpine as build
 
-# Set the working directory
 WORKDIR /app
 
 # Copy package.json and package-lock.json
@@ -10,14 +9,24 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Copy the rest of your app's source code
+# Copy the rest of the code
 COPY . .
 
-# Build your Next.js app
+# Build the app
 RUN npm run build
 
-# Expose the port Next.js runs on
-EXPOSE 3000
+# Production stage
+FROM nginx:alpine
 
-# Start the app
-CMD ["npm", "start"]
+# Copy the built assets from the build stage
+COPY --from=build /app/public /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html/build
+
+# Copy nginx configuration
+COPY ../nginx/nginx.conf /etc/nginx/nginx.conf
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]

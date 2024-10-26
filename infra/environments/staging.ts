@@ -17,29 +17,6 @@ export const stagingConfig: EnvironmentConfig = {
     allocatedStorage: 50,
     multiAz: true,
   },
-  ory: {
-    kratos: {
-      replicas: 2,
-      resources: {
-        cpu: 512,
-        memory: 1024,
-      },
-    },
-    keto: {
-      replicas: 2,
-      resources: {
-        cpu: 512,
-        memory: 1024,
-      },
-    },
-    oathkeeper: {
-      replicas: 2,
-      resources: {
-        cpu: 512,
-        memory: 1024,
-      },
-    },
-  },
   typesense: {
     instanceType: "t3.small",
   },

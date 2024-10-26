@@ -17,29 +17,6 @@ export const devConfig: EnvironmentConfig = {
     allocatedStorage: 20,
     multiAz: false,
   },
-  ory: {
-    kratos: {
-      replicas: 1,
-      resources: {
-        cpu: 256,
-        memory: 512,
-      },
-    },
-    keto: {
-      replicas: 1,
-      resources: {
-        cpu: 256,
-        memory: 512,
-      },
-    },
-    oathkeeper: {
-      replicas: 1,
-      resources: {
-        cpu: 256,
-        memory: 512,
-      },
-    },
-  },
   typesense: {
     instanceType: "t3.micro",
   },

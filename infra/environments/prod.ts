@@ -17,29 +17,6 @@ export const prodConfig: EnvironmentConfig = {
     allocatedStorage: 100,
     multiAz: true,
   },
-  ory: {
-    kratos: {
-      replicas: 3,
-      resources: {
-        cpu: 1024,
-        memory: 2048,
-      },
-    },
-    keto: {
-      replicas: 3,
-      resources: {
-        cpu: 1024,
-        memory: 2048,
-      },
-    },
-    oathkeeper: {
-      replicas: 3,
-      resources: {
-        cpu: 1024,
-        memory: 2048,
-      },
-    },
-  },
   typesense: {
     instanceType: "t3.medium",
   },
