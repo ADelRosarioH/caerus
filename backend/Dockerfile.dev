@@ -1,5 +1,11 @@
 FROM golang:1.23.1-alpine
 
+# Add git, debugger & required tools
+RUN apk add --no-cache git build-base
+
+# Install delve debugger
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
 WORKDIR /app
 
 RUN go install github.com/air-verse/air@latest

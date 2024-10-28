@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
 import { useEffect } from "react";
+import oidcConfig from "~/config/auth.config";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,6 +10,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  console.log(oidcConfig);
   useEffect(() => {
     fetch("/api/livez")
       .then((res) => res.text())

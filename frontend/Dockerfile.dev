@@ -1,7 +1,15 @@
-# Use an official Node runtime as the base image
+# Start from the official Node.js LTS image
 FROM node:lts-alpine
 
-# Set the working directory in the container
+# Set build-time environment variables
+ARG AUTH_AUTHORITY=https://keyloak:8080/auth/realms/master
+ARG AUTH_CLIENT_ID=client_id
+
+# Set environment variables
+ENV AUTH_AUTHORITY=$AUTH_AUTHORITY
+ENV AUTH_CLIENT_ID=$AUTH_CLIENT_ID
+
+# Set the working directory inside the container
 WORKDIR /app
 
 # Copy package.json and package-lock.json
@@ -13,9 +21,12 @@ RUN npm ci
 # Copy the rest of the application code
 COPY . .
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Build the Remix application
+RUN npm run build
+
+# Expose port 3001 to the outside world
+EXPOSE 3001
 EXPOSE 24678
 
-# Command to run the application in development mode
+# Command to run the application
 CMD ["npm", "run", "dev"]

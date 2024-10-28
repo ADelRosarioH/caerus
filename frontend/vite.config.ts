@@ -4,7 +4,17 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 const port = parseInt(process.env.PORT || "3000", 10);
 
+const AUTH_AUTHORITY = process.env.AUTH_AUTHORITY;
+const AUTH_CLIENT_ID = process.env.AUTH_CLIENT_ID;
+
 export default defineConfig({
+  appType: "spa",
+  define: {
+    "window.ENV": {
+      AUTH_AUTHORITY,
+      AUTH_CLIENT_ID,
+    },
+  },
   plugins: [
     remix({
       ssr: false,
@@ -20,6 +30,20 @@ export default defineConfig({
     port,
     hmr: {
       port: 24678,
+    },
+    proxy: {
+      "/api": {
+        target: "http://backend:8081",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+      "/auth": {
+        target: "http://backend:8080/auth",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/auth/, ""),
+      },
     },
   },
 });

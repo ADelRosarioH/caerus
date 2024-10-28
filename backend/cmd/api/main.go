@@ -12,10 +12,6 @@ import (
 )
 
 func main() {
-	// if err := godotenv.Load(); err != nil {
-	// 	log.Println("No .env file found")
-	// }
-
 	app := fiber.New()
 
 	// Initialize auth service
@@ -32,24 +28,19 @@ func main() {
 	app.Use(middleware.Cors())
 	app.Use(middleware.Auth())
 
+	// Register routes
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World!!!!")
+	})
+
 	// Initialize database
 	if err := database.InitDatabase(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// Initialize Typesense client
-	// typesenseClient, err := typesense.NewClient()
-	// if err != nil {
-	// 	log.Fatalf("Failed to initialize Typesense client: %v", err)
-	// }
-
-	// Setup routes
-	// api := app.Group("/api")
-	// api.Use(authMiddleware.Authenticate())
-
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 
 	log.Printf("Server starting on port %s", port)

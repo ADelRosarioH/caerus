@@ -1,0 +1,10 @@
+config:
+  aws:region: us-east-1
+  pulumi:template: aws-typescript
+  caerus:domainName: milkmoney.cloud
+  caerus:env: development
+  caerus:database:
+    name: caerusdb
+    username: caerus
+    password:
+      secure: AAABAKzIvoz/H08yR/HR3YBk7Mr0EY76fILm3IaLw7hE3Gtsb9Q99h2JXYR/Ow==
